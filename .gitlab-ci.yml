@@ -1,0 +1,33 @@
+stages:
+  - deploy-dev
+  - deploy-pro
+
+image: node:14.18.2
+
+deploy-dev:
+  stage: deploy-dev
+  tags:
+    - docker-keo-runner
+  script:
+    - cp $ENV_DEVELOPMENT .env.production.local
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_SERVICE_ACCOUNT_FILE
+    - npm install
+    - npm run build
+    - npm i -g firebase-tools@latest
+    - firebase -P dev target:apply hosting dev_target per-sider-qa --debug
+    - firebase deploy -P dev --only hosting:dev_target  #$FIREBASE_TOKEN --debug
+  only:
+    - dev
+
+deploy-pro:
+  stage: deploy-pro
+  tags:
+    - docker-keo-runner
+  script:
+    - cp $ENV_PRODUCTION .env.production.local
+    - npm install
+    - npm run build
+    - firebase -P pro target:apply hosting pro_target billpocket-pro
+    - firebase deploy -P pro --only hosting:pro_target --token $FIREBASE_TOKEN
+  only:
+    - master

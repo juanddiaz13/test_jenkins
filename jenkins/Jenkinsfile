@@ -1,0 +1,19 @@
+pipeline {
+    agent {
+        docker {
+            image 'node:14.18.2'
+            args '-p 3000:3000'
+        }
+    }
+    environment { 
+        CI = 'true'
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('SIDER QA') 
+    }
+    stages {
+        stage('deploy') {
+            steps {
+                sh './jenkins/scripts/staging.sh'
+            }
+        }
+    }
+}
